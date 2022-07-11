@@ -95,4 +95,7 @@ export default {
 .van-cell{
   border-bottom: 1px solid lightgray;
 }
+.van-row{
+  margin: 0 8px;
+}
 </style>
