@@ -1,6 +1,6 @@
 <template>
 <!-- 搜索部分，点击搜索以后，在中间部分显示的内容，二级路由 -->
-  <div style="margin-bottom:45px;">
+  <div>
     <van-search 
       v-model="value" 
       placeholder="请输入搜索关键词" 
@@ -32,13 +32,18 @@
         finished-text="没有更多了"
         @load="onLoad"
       >
-        <van-cell center :title="item.name" 
+      <SongItem v-for="item in resultList" :key="item.id"
+      :name="item.name"
+      :author="item.ar[0].name"
+      :id="item.id"
+      ></SongItem>
+        <!-- <van-cell center :title="item.name" 
           :label="`${item.ar[0].name} - ${item.name}`" 
           v-for="item in resultList" :key="item.id">
             <template #right-icon>
               <van-icon name="play-circle-o" class="play-icon"/>
             </template>
-        </van-cell>
+        </van-cell> -->
       </van-list>
     </template>
   </div>
@@ -71,7 +76,11 @@
 //4.把当前数据和下一页新来的数据拼接起来用在当前页面的数组里
 //(切记)-加载更多数据后,一定要把loading改成false,保证下一次还能触发onload方法
 import {searchHotAPI,searchResultAPI} from "@/apis"
+import SongItem from '@/components/SongItem'
 export default {
+  components: {
+    SongItem
+  },
   data () {
     return {
       value:'',//获取的热搜关键字
@@ -79,7 +88,8 @@ export default {
       resultList:[],//搜索结果列表
       loading:false,//加载中的状态，只有为false,才能触底后自动触发onload方法
       finished:false,//未加载全部(如果设置为true,底部就不会再次执行onload,代表全部加载完成)
-      page:1//当前的页码
+      page:1,//当前的页码
+      timer:null//输入框防抖的定时器
     }
   },
   async created () {
@@ -100,13 +110,16 @@ export default {
       //拿到getListFn的返回值用await提取结果
     },
     async clickFn(val){
-      this.finished=false
-      this.value=val
+      // 点击热搜关键词
+      this.page=1;
+      this.finished=false//点击新关键词-可能有新的数据
+      this.value=val//选中的关键词显示到搜索框
       // 返回的是promise对象，所以需用用await来接收
       // console.log(this.getResult());
       const res=await this.getResult()
       console.log(res.data.result.songs);
       this.resultList=res.data.result.songs
+      this.loading=false;//本次加载完成
     },
     // 触底事件（要加载下一页的数据）
     async onLoad(){
@@ -115,24 +128,34 @@ export default {
       console.log(res.data.result.songs);
       if(res.data.result.songs==undefined){
         this.finished=true//finshed为true，表示不会再次触发下一页，表示没有数据了
+        this.loading=false;
         return
       }
       this.resultList=[...this.resultList,...res.data.result.songs]
       this.loading=false;//数据加载完毕-保证下一次还能触发onload
     },
     async inputFn(){
-      this.finished=false
-      if(this.value.length===0){
-        // 搜索关键词如果没有，就把搜索结果清空，并阻止网络请求发送，提前return结束运行
-        this.resultList=[];
-        return
-      }
-      const res=await this.getResult()
-      if(res.data.result.songs==undefined){
-        this.resultList=[];
-        return
-      }
-      this.resultList=res.data.result.songs
+      this.page=1;
+      //目标:输入框改变-逻辑代码-慢点执行
+      //解决:防抖
+      //什么:计时n秒,最后执行一次,如果再次触发,重新计时
+      if(this.timer) clearTimeout(this.timer)
+      this.timer=setTimeout(async()=>{
+        this.page=1;
+        this.finished=false
+        if(this.value.length===0){
+          // 搜索关键词如果没有，就把搜索结果清空，并阻止网络请求发送，提前return结束运行
+          this.resultList=[];
+          return
+        }
+        const res=await this.getResult()
+        if(res.data.result.songs==undefined){
+          this.resultList=[];
+          return
+        }
+        this.resultList=res.data.result.songs
+        this.loading=false;
+      },1000)
     }
   }
 }

@@ -9,3 +9,7 @@ export const newMusicAPI=newMusic
 import {searchHot,searchResult} from "./Search"
 export const searchHotAPI=searchHot
 export const searchResultAPI=searchResult
+
+import {getSongById,getLyricById} from "./Play"
+export const getSongByIdAPI=getSongById
+export const getLyricByIdAPI=getLyricById

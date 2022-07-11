@@ -27,6 +27,12 @@ fn()
 
 Vue.config.productionTip = false
 
+// 目标: Vant组件库自动适配
+// 自动让所有px转成rem (以后我们可以直接写px)- webpack配合postcss和postcss-pxtorem插件就可以翻译css代码,把px转rem使用
+// 1. 下载postcss postcss-pxtorem
+// 2. postcss.config.js -填入插件转换的基准值(配置可以复制md)
+// 3. 一定要重启服务器,观察效果
+
 new Vue({
   render: h => h(App),
   router,

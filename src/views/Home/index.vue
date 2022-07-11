@@ -1,6 +1,6 @@
 <template>
 <!-- 首页，点击首页导航后，中间部分显示的内容，二级路由 -->
-  <div style="margin-bottom:45px">
+  <div>
     <!-- 推荐歌单 -->
     <van-cell title="推荐歌单" class="title"/>
     <!-- <van-grid>
@@ -19,14 +19,18 @@
 
     <!-- 最新音乐 -->
     <van-cell title="最新音乐" class="title"/>
-    <van-cell center :title="item.name" 
+    <!-- <van-cell center :title="item.name" 
     :label="`${item.song.artists[0].name} - ${item.name}`" 
     v-for="item in newList" :key="item.id">
-      <!-- 使用 right-icon 插槽来自定义右侧图标 -->
       <template #right-icon>
         <van-icon name="play-circle-o" class="play-icon"/>
       </template>
-    </van-cell>
+    </van-cell> -->
+    <SongItem v-for="item in newList" :key="item.id"
+      :name="item.name"
+      :author="item.song.artists[0].name"
+      :id="item.id"
+      ></SongItem>
   </div>
 </template>
 
@@ -44,7 +48,11 @@
 //3. api/Home.js和api/index.js-封装导出获取最新音乐接口方法
 //4.获取数据循环铺设页面即可
 import {recommendMusicAPI,newMusicAPI} from "@/apis"
+import SongItem from '@/components/SongItem'
 export default {
+  components: {
+    SongItem
+  },
   data () {
     return {
       reList:[],//推荐歌单
@@ -87,13 +95,6 @@ export default {
   -webkit-box-orient: vertical; /** 设置或检索伸缩盒对象的子元素的排列方式 **/
   -webkit-line-clamp: 2; /** 显示的行数 **/
   overflow: hidden; /** 隐藏超出的内容 **/
-}
-.play-icon {
-  font-size: 20px;
-  margin-top: 12px;
-}
-.van-cell{
-  border-bottom: 1px solid lightgray;
 }
 .van-row{
   margin: 0 8px;
